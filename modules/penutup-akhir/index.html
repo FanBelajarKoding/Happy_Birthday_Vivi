@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@300;400;600&display=swap"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Untuk Kamu</title>
+  </head>
+  <body>
+    <!-- ===== [PENUTUP-KARTU] ===== -->
+    <div class="pa-kartu">
+      <p class="pa-label">UNTUK KAMU</p>
+      <!-- EDIT: ganti nama/kalimat ini kalau mau -->
+      <h1 class="pa-judul">Happy Birthday, Vivi</h1>
+      <!-- EDIT: ganti tanda tangan ini -->
+      <p class="pa-tanda-tangan">dari orang yang bikin ini</p>
+      <hr class="pa-garis" />
+      <!-- EDIT: ganti pesan penutup ini sesuai kata-katamu sendiri -->
+      <p class="pa-pesan">
+        Terima kasih sudah jadi bagian dari cerita ini. Semoga tahun ini
+        membawa lebih banyak hal baik buatmu.
+      </p>
+    </div>
+    <!-- ===== END [PENUTUP-KARTU] ===== -->
+
+    <!-- ===== [PENUTUP-ULANGI] ===== -->
+    <!-- target="_top" biar navigasi ke halaman utama, bukan cuma
+         reload di dalam iframe ini sendiri. Sengaja pakai <a> biasa,
+         bukan window.parent lewat JS, karena akses lintas-frame lewat
+         JS bisa diblokir browser kalau filenya dibuka lewat file://
+         (double klik langsung), sementara navigasi lewat link normal
+         selalu aman dipakai di kondisi apa pun. -->
+    <a class="pa-tombol" href="../../index.html" target="_top">Ulangi dari awal ↺</a>
+    <!-- ===== END [PENUTUP-ULANGI] ===== -->
+    <script src="../../shared/jeda-saat-tersembunyi.js"></script>
+</body>
+</html>

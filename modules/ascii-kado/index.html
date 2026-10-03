@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ASCII — Kado Digital</title>
+  <style>
+    /* ===== DESIGN TOKENS — TEMA PINK SOFT ===== */
+    :root {
+      /* EDIT: ubah warna tema di sini */
+      --neon: #f7c6d9;   /* hijau neon utama */
+      --neon-dim: #8a5a6e;   /* hijau gelap untuk elemen redup */
+      --neon-mid: #f2a8c4;   /* hijau medium */
+      --neon-glow: #ff9ec7;   /* warna glow/shadow */
+      --bg:        #000000;   /* hitam pekat */
+      --bg-surface:#0d0608;   /* hitam sedikit kemerahan */
+      --dim:       rgba(247,198,217,0.3);
+      --bright:    1.2;
+      --speed:     550ms;
+      --glow-size: 7rem;
+    }
+    /* ===== END DESIGN TOKENS ===== */
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ===== END RESET ===== */
+
+    /* ===== BODY ===== */
+    body {
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      color: var(--neon);
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* Scanline effect — nuansa monitor CRT */
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(247,198,217,0.02) 2px,
+        rgba(247,198,217,0.02) 4px
+      );
+    }
+    /* ===== END BODY ===== */
+
+    /* ===== SCENE ===== */
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--speed) ease;
+    }
+    .scene.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    /* ===== END SCENE ===== */
+
+    /* ===== ASCII OUTPUT ===== */
+    .ascii-wrap {
+      opacity: 1;
+      transition: opacity var(--speed) ease;
+    }
+    .ascii-out {
+      text-align: center;
+      font-size: 11px;
+      line-height: 1;
+      white-space: nowrap;
+      filter:
+        drop-shadow(0 0 var(--glow-size) var(--glow-color, var(--neon-glow)))
+        brightness(var(--bright));
+    }
+    .ascii-out div { display: block; }
+    /* ===== END ASCII OUTPUT ===== */
+
+    /* ===== PROGRESS DOTS ===== */
+    #lyric-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 22px;
+    }
+    .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--neon);
+      opacity: 0.2;
+      transition: opacity 350ms, transform 350ms, box-shadow 350ms;
+    }
+    .dot.active {
+      opacity: 1;
+      transform: scale(1.6);
+      box-shadow: 0 0 6px var(--neon-glow);
+    }
+    /* ===== END PROGRESS DOTS ===== */
+
+    /* ===== SCENE MEDIA ===== */
+    #scene-media { gap: 16px; }
+    #src-video { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    #replay-btn {
+      display: none; padding: 6px 18px; border-radius: 3px;
+      border: 1px solid var(--neon); background: transparent; color: var(--neon);
+      font-family: inherit; font-size: 11px; letter-spacing: 0.08em; cursor: pointer;
+      box-shadow: 0 0 10px rgba(247,198,217,0.3);
+    }
+    /* ===== END SCENE MEDIA ===== */
+
+    /* ===== TOMBOL MULAI & MINI PLAYER ===== */
+    #scene-start { gap: 18px; }
+    #start-btn {
+      width: 84px; height: 84px; border-radius: 50%; padding-left: 5px;
+      border: 1px solid var(--neon); background: transparent; color: var(--neon);
+      font-size: 28px; cursor: pointer;
+      box-shadow: 0 0 18px rgba(247,198,217,0.35);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 50% { transform: scale(1.06); box-shadow: 0 0 34px rgba(247,198,217,0.6); } }
+    .start-text { font-size: 12px; color: var(--dim); letter-spacing: 0.12em; }
+
+    #mini {
+      position: fixed; left: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); /* kiri: tombol ↓ proyek ada di tengah */
+      display: none; align-items: center; gap: 10px; z-index: 10;
+    }
+    #mini.on { display: flex; }
+    .ctrl-btn {
+      width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+      border: 1px solid var(--neon-dim); background: rgba(0,0,0,0.6); color: var(--neon); font-size: 13px;
+    }
+    .ctrl-btn:hover { border-color: var(--neon); }
+    /* equalizer palsu (CSS saja, ikut berhenti saat musik di-pause) */
+    .eq { display: flex; align-items: flex-end; gap: 2px; height: 18px; }
+    .eq i { width: 3px; height: 4px; background: var(--neon); animation: eq 900ms ease-in-out infinite alternate; }
+    .eq i:nth-child(2) { animation-delay: -0.3s; }
+    .eq i:nth-child(3) { animation-delay: -0.6s; }
+    .eq i:nth-child(4) { animation-delay: -0.15s; }
+    @keyframes eq { to { height: 18px; } }
+    #mini.paused .eq i { animation-play-state: paused; }
+    /* ===== END TOMBOL MULAI & MINI PLAYER ===== */
+
+    /* ===== PENYETEL WAKTU LIRIK ===== */
+    #penyetel {
+      position: fixed; top: 18px; left: 0; right: 0; z-index: 20;
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+      padding: 0 16px; text-align: center; font-size: 12px; color: var(--neon);
+    }
+    #penyetel.on { display: flex; }
+    #setel-info { white-space: pre-line; line-height: 1.5; }
+    #setel-ketuk { width: auto; height: auto; border-radius: 3px; padding: 12px 34px; font: inherit; font-size: 13px; }
+    #setel-hasil { margin: 0; text-align: left; font-size: 11px; color: var(--neon-mid); }
+    /* ===== END PENYETEL WAKTU LIRIK ===== */
+
+    
+
+    /* ===== HIDDEN CANVAS ===== */
+    #lyric-canvas, #media-canvas { display: none; }
+    /* ===== END HIDDEN CANVAS ===== */
+  </style>
+</head>
+<body>
+
+  <!-- ===== SCENE 0: TOMBOL MULAI ===== -->
+  <section class="scene active" id="scene-start">
+    <button id="start-btn" aria-label="Putar">▶</button>
+    <!-- EDIT: teks di bawah tombol -->
+    <p class="start-text">_ tekan untuk memulai _</p>
+  </section>
+  <!-- ===== END SCENE 0 ===== -->
+
+  <!-- ===== SCENE 1: LIRIK ASCII ===== -->
+  <section class="scene" id="scene-lyric">
+    <div class="ascii-wrap" id="lyric-wrap"><div class="ascii-out" id="lyric-out"></div></div>
+    <div id="lyric-dots"></div>
+  </section>
+  <!-- ===== END SCENE 1 ===== -->
+
+  <!-- ===== SCENE 2: FOTO & VIDEO ASCII ===== -->
+  <section class="scene" id="scene-media">
+    <div class="ascii-wrap"><div class="ascii-out" id="media-out"></div></div>
+    <button id="replay-btn">[ ulangi ]</button>
+  </section>
+  <video id="src-video" muted playsinline></video>
+  <!-- ===== END SCENE 2 ===== -->
+
+  <!-- ===== PENYETEL WAKTU LIRIK (hanya muncul di index.html?setel) ===== -->
+  <div id="penyetel">
+    <p id="setel-info"></p>
+    <button class="ctrl-btn" id="setel-ketuk">[ ketuk ]</button>
+    <pre id="setel-hasil"></pre>
+  </div>
+  <!-- ===== END PENYETEL ===== -->
+
+  <!-- ===== MINI PLAYER ===== -->
+  <div id="mini" class="paused">
+    <button class="ctrl-btn" id="music-toggle">▶</button>
+    <div class="eq"><i></i><i></i><i></i><i></i></div>
+  </div>
+  <!-- ===== END MINI PLAYER ===== -->
+
+  <canvas id="lyric-canvas"></canvas>
+  <canvas id="media-canvas"></canvas>
+
+<script>
+(() => {
+  // ===== KONFIGURASI UTAMA =====
+  // EDIT: ubah teks lirik, durasi tampil (showMs), dan jeda (hideMs) di sini
+  const CONFIG = {
+    // EDIT: at = detik lagu saat lirik itu mulai dinyanyikan. Kalau lagu belum ada,
+    // lirik jalan sendiri dengan ritme showMs/hideMs. Cara cari angka at: buka halaman ini
+    // dengan "?setel" di belakang alamatnya (index.html?setel), putar lagu, lalu ketuk tombolnya.
+    syncLagu: true,
+    lyrics: [
+      { at: 0, text: "Do you think",              showMs: 2200, hideMs: 600  },
+      { at: 3.4, text: "I have forgotten",          showMs: 3500, hideMs: 900  },
+      { at: 8.3, text: "About you?",                showMs: 4000, hideMs: 1200 },
+      { at: 14.1, text: "There was something",       showMs: 2600, hideMs: 400  },
+      { at: 17.6, text: "'bout you",                 showMs: 2200, hideMs: 800  },
+      { at: 21.2, text: "That now I can't remember", showMs: 4000, hideMs: 2000 },
+    ],
+    // EDIT: lagu latar (taruh file di folder audio/). Kosongkan "" kalau tanpa musik.
+    music: "audio/lagu.mp3",
+    // EDIT: video setelah foto (taruh di folder vid/). Boleh kosong [] atau lebih dari satu.
+    videos: ["vid/video1.mp4"],
+    videoCols: 90,      // video lebih kecil supaya ringan
+    photoMs: 3800,      // lama tiap foto tampil
+    dissolveMs: 1600,   // lama efek "lebur" masuk/keluar
+
+
+    // EDIT: resolusi karakter (kolom x baris) — naikkan untuk lebih detail
+    lyricCols: 120, lyricRows: 36,
+    mediaCols: 120, // tinggi (baris) dihitung otomatis dari bentuk foto
+
+    // EDIT: daftar foto (path relatif dari file ini). Tambah/ganti sesukamu.
+    photos: [
+      "img/Picture4.jpg",
+      "img/Picture5.jpg",
+      "img/Picture6.jpg",
+      "img/Picture7.jpg",
+    ],
+
+    maxBrightness: 700,
+  };
+  // ===== END KONFIGURASI UTAMA =====
+
+  // ===== KARAKTER ASCII =====
+  // Urutan: gelap (kiri) → terang (kanan)
+  // Array di dalam [] = dipilih pakai seed per-pixel supaya tidak kedap-kedip
+  const CHARS = [
+    " ", ".", ",", "-", "=", "+",
+    "i", "s", "c", "b", "a", "!", "?",
+    "0", "1", "2", "3", "4", "5", "6",
+    ["9","8"], ["✚","✚","⚛︎"], ["☺︎","☹︎"],
+    "☀︎", ["@","#"], ["X","Y","Z"], "'",
+  ];
+  // ===== END KARAKTER ASCII =====
+
+  // ===== UTILITY =====
+  // Konversi kecerahan pixel → karakter ASCII
+  // seed = angka tetap per-pixel, supaya karakter array tidak kedap-kedip tiap frame
+  function pickChar(brightness, seed) {
+    const ratio = brightness / CONFIG.maxBrightness;
+    const idx   = Math.min(Math.max(Math.floor(ratio * CHARS.length), 0), CHARS.length - 1);
+    const entry = CHARS[idx];
+    if (!Array.isArray(entry)) return entry;
+    return entry[seed % entry.length];
+  }
+
+  // Render pixel array (ImageData) → string HTML baris-per-baris
+  // mode: "lyric" = warna ikut pixel asli | "media" = hijau gradasi kecerahan
+  function pixelsToHTML(data, cols, rows, seeds, mode, reveal = 1) {
+    // Warna neon hijau: ambil dari CSS variable --neon
+    let html = "";
+    for (let y = 0; y < rows; y++) {
+      html += "<div>";
+      for (let x = 0; x < cols; x++) {
+        const i   = (x + y * cols) * 4;
+        const r   = data[i], g = data[i+1], b = data[i+2];
+        const br0 = (r + g + b) / 3;
+        const br  = mode === "media" ? Math.min(br0 * 1.6, 255) : br0; // foto dicerahkan agar tidak pucat
+        // reveal 0→1: karakter muncul acak satu per satu (efek lebur)
+        const ch  = (seeds[x + y * cols] < reveal * 100 ? pickChar(br, seeds[x + y * cols]) : " ") ?? " ";
+
+        // pink soft: gelap -> terang mengikuti kecerahan pixel
+        const k = 0.3 + 0.7 * (br / 255);
+        const a = Math.min(br / (mode === "media" ? 160 : 140), 1).toFixed(2);
+        const color = `rgba(${Math.round(247*k)},${Math.round(198*k)},${Math.round(217*k)},${a})`;
+
+        html += `<span style="color:${color}">${ch === " " ? "&nbsp;" : ch}</span>`;
+      }
+      html += "</div>";
+    }
+    return html;
+  }
+
+  // Buat seed tetap per-pixel (supaya array char tidak berubah tiap frame)
+  function makeSeed(n) {
+    const s = new Uint8Array(n);
+    for (let i = 0; i < n; i++) s[i] = Math.floor(Math.random() * 100);
+    return s;
+  }
+  // ===== END UTILITY =====
+
+  // ===== ALUR: tombol → lirik → foto → video =====
+  const $ = id => document.getElementById(id);
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const scenes = document.querySelectorAll(".scene");
+  const CHAR_RATIO = 0.6; // lebar 1 karakter ≈ 0.6 x tingginya
+
+  function showScene(id) { scenes.forEach(s => s.classList.toggle("active", s.id === id)); }
+
+  // Ukuran font menyesuaikan layar (HP & laptop)
+  const fits = [];
+  function fitTo(el, getDims) { fits.push(() => { const d = getDims(); if (!d) return;
+    el.style.fontSize = Math.min(11, innerWidth * 0.92 / (d.cols * CHAR_RATIO), innerHeight * 0.75 / d.rows) + "px"; }); fits.at(-1)(); }
+  addEventListener("resize", () => fits.forEach(f => f()));
+
+  // ===== MUSIK (tombol play/pause) =====
+  const audio = new Audio();
+  audio.loop = true; audio.volume = 0.75;
+  if (CONFIG.music) audio.src = CONFIG.music;
+  const mini = $("mini"), toggle = $("music-toggle");
+  audio.onplay  = () => { mini.classList.remove("paused"); toggle.textContent = "⏸"; };
+  audio.onpause = () => { mini.classList.add("paused");    toggle.textContent = "▶"; };
+  toggle.onclick = () => audio.paused ? audio.play().catch(() => {}) : audio.pause();
+  // ===== END MUSIK =====
+
+  // ===== LIRIK =====
+  async function playLyrics() {
+    const canvas = $("lyric-canvas"), out = $("lyric-out"), wrap = $("lyric-wrap"), dotsEl = $("lyric-dots");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const { lyricCols: W, lyricRows: H } = CONFIG;
+    canvas.width = W; canvas.height = H;
+    const seeds = makeSeed(W * H);
+    fitTo(out, () => ({ cols: W, rows: H }));
+
+    dotsEl.innerHTML = CONFIG.lyrics.map(() => '<div class="dot"></div>').join("");
+    const dots = dotsEl.children;
+
+    for (let i = 0; i < CONFIG.lyrics.length; i++) {
+      // sinkron lagu: tunggu sampai lagu mencapai detik "at" lirik ini (kalau lagu sedang main)
+      const at = CONFIG.lyrics[i].at;
+      if (CONFIG.syncLagu && at != null) while (!audio.paused && audio.currentTime < at) await wait(50);
+      [...dots].forEach((d, j) => d.classList.toggle("active", j === i));
+      // gambar teks ke canvas tersembunyi, lalu ubah jadi ASCII (sekali per lirik, bukan tiap frame)
+      ctx.fillStyle = "black"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = '900 13px "Arial Black", Impact, sans-serif';
+      const words = CONFIG.lyrics[i].text.split(" "), lines = []; let cur = words[0];
+      for (let k = 1; k < words.length; k++) {
+        const t = cur + " " + words[k];
+        if (ctx.measureText(t).width < W - 4) cur = t; else { lines.push(cur); cur = words[k]; }
+      }
+      lines.push(cur);
+      const sy = H / 2 - lines.length * 15 / 2 + 7.5;
+      lines.forEach((ln, k) => ctx.fillText(ln, W / 2, sy + k * 15));
+      out.innerHTML = pixelsToHTML(ctx.getImageData(0, 0, W, H).data, W, H, seeds, "lyric");
+
+      wrap.style.opacity = 1;
+      await wait(CONFIG.lyrics[i].showMs);
+      wrap.style.opacity = 0;
+      await wait(560 + CONFIG.lyrics[i].hideMs);
+    }
+    dotsEl.style.opacity = 0;
+  }
+  // ===== END LIRIK =====
+
+  // ===== FOTO & VIDEO (lanjutan setelah lirik) =====
+  const canvas = $("media-canvas"), out = $("media-out");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  let frame = null;
+  fitTo(out, () => frame);
+
+  function setFrame(src, w, h, cols) {
+    const rows = Math.round(cols * (h / w) * CHAR_RATIO);
+    canvas.width = cols; canvas.height = rows;
+    frame = { cols, rows, seeds: makeSeed(cols * rows), data: null };
+    fits.forEach(f => f()); readFrame(src);
+  }
+  function readFrame(src) {
+    ctx.drawImage(src, 0, 0, frame.cols, frame.rows);
+    frame.data = ctx.getImageData(0, 0, frame.cols, frame.rows).data;
+  }
+  const draw = r => { out.innerHTML = pixelsToHTML(frame.data, frame.cols, frame.rows, frame.seeds, "media", r); };
+
+  // Animasi "lebur": reveal dari a ke b (0 = kosong, 1 = penuh)
+  async function dissolve(a, b, ms) {
+    const t0 = performance.now();
+    for (;;) {
+      const p = Math.min((performance.now() - t0) / ms, 1);
+      draw(a + (b - a) * p);
+      if (p >= 1) return;
+      await wait(70);
+    }
+  }
+
+  const loadImg = src => new Promise(res => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => { console.warn("Foto tidak ketemu:", src); res(null); };
+    img.src = src;
+  });
+
+  async function playVideo(src) {
+    const v = $("src-video");
+    v.src = src;
+    const ok = await new Promise(res => { v.onloadeddata = () => res(true); v.onerror = () => res(false); });
+    if (!ok) { console.warn("Video tidak ketemu:", src); return; }
+    setFrame(v, v.videoWidth, v.videoHeight, CONFIG.videoCols);
+    const ended = new Promise(res => { v.onended = res; });
+    await v.play();
+    const t0 = performance.now(); let live = true;
+    (async () => {                       // baca frame video ±15x per detik
+      while (live) {
+        readFrame(v);
+        draw(Math.min((performance.now() - t0) / CONFIG.dissolveMs, 1));
+        await wait(66);
+      }
+    })();
+    await ended; live = false; await wait(80);
+    await dissolve(1, 0, CONFIG.dissolveMs * 0.6);
+  }
+  // ===== END FOTO & VIDEO =====
+
+  async function main() {
+    showScene("scene-lyric");
+    await playLyrics();
+
+    // lirik selesai → lebur jadi foto → video
+    const photos = (await Promise.all(CONFIG.photos.map(loadImg))).filter(Boolean);
+    showScene("scene-media");
+    try {
+      for (const img of photos) {
+        setFrame(img, img.naturalWidth, img.naturalHeight, CONFIG.mediaCols);
+        await dissolve(0, 1, CONFIG.dissolveMs);
+        await wait(CONFIG.photoMs);
+        await dissolve(1, 0, CONFIG.dissolveMs * 0.6);
+      }
+      for (const src of CONFIG.videos) await playVideo(src);
+    } catch (err) {
+      // file:// membuat browser menolak baca pixel foto/video
+      out.textContent = err.name === "SecurityError"
+        ? "Buka lewat Live Server ya, bukan klik dua kali." : "Ada error: " + err.message;
+      console.error(err); return;
+    }
+    $("replay-btn").style.display = "block";
+  }
+
+  // Saat babak ini keluar layar (lanjut ke babak lain), reset: musik berhenti & balik ke tombol ▶
+  // (rasio 0 = benar-benar tak terlihat)
+  let sudahMulai = false;
+  new IntersectionObserver(([e]) => { if (sudahMulai && e.intersectionRatio === 0) location.reload(); }, { threshold: [0, 0.05] })
+    .observe(document.body);
+
+  // ===== MODE PENYETEL (index.html?setel) =====
+  // Lagu diputar dari awal; ketuk tombol tiap kali sebuah lirik MULAI dinyanyikan.
+  // Hasilnya (detik) tinggal disalin ke "at:" di CONFIG.lyrics.
+  function jalankanPenyetel() {
+    showScene("scene-lyric");
+    $("lyric-wrap").style.opacity = 0;
+    const info = $("setel-info"), hasil = $("setel-hasil"), waktu = [];
+    $("penyetel").classList.add("on");
+    const tampil = () => {
+      info.textContent = waktu.length < CONFIG.lyrics.length
+        ? "Ketuk saat lirik ke-" + (waktu.length + 1) + " mulai dinyanyikan:\n" + CONFIG.lyrics[waktu.length].text
+        : "Selesai! Salin angka di bawah ke at: pada CONFIG.lyrics";
+    };
+    tampil();
+    $("setel-ketuk").onclick = () => {
+      if (waktu.length >= CONFIG.lyrics.length) return;
+      waktu.push(+audio.currentTime.toFixed(1));
+      hasil.textContent = waktu.map((t, i) => "lirik " + (i + 1) + ":  at: " + t + ",").join("\n");
+      tampil();
+    };
+  }
+  // ===== END MODE PENYETEL =====
+
+  $("start-btn").onclick = () => {
+    sudahMulai = true;
+    mini.classList.add("on");
+    audio.currentTime = 0;
+    audio.play().catch(() => console.warn("Lagu tidak bisa diputar (cek path CONFIG.music)"));
+    location.search.includes("setel") ? jalankanPenyetel() : main();
+  };
+  $("replay-btn").onclick = () => location.reload();
+
+})();
+</script>
+
+</body>
+</html>

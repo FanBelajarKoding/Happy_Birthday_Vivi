@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="envelope.css">
+    <title>Untuk Vivi</title>
+  </head>
+  <body>
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <defs>
+          <symbol id="icon-heart" viewBox="0 0 32 32">
+              <title>heart</title>
+              <path d="M23.6 2c-3.363 0-6.258 2.736-7.599 5.594-1.342-2.858-4.237-5.594-7.601-5.594-4.637 0-8.4 3.764-8.4 8.401 0 9.433 9.516 11.906 16.001 21.232 6.13-9.268 15.999-12.1 15.999-21.232 0-4.637-3.763-8.401-8.4-8.401z"></path>
+          </symbol>
+          <symbol id="icon-cake" viewBox="0 0 32 32">
+              <title>cake</title>
+              <path d="M16,2 C17,4 18,5 16,7 C14,5 15,4 16,2 Z"></path>
+              <rect x="15" y="7" width="2" height="6"></rect>
+              <path d="M6,18 L6,15 L9,12 L12,15 L15,12 L18,15 L21,12 L24,15 L26,15 L26,18 Z"></path>
+              <rect x="5" y="18" width="22" height="10" rx="1.5"></rect>
+              <rect x="3" y="28" width="26" height="2" rx="1"></rect>
+          </symbol>
+      </defs>
+  </svg>
+  <div class="container">
+      <a class="envelope-wrapper js-open-envelope" href="#">
+          <div class="envelope tossing">
+              <div class="envelope__side envelope__side--top"></div>
+              <div class="envelope__card">
+                <!-- EDIT: ganti kalimat di bawah ini sesuai kata-katamu sendiri -->
+                <p class="enveloper__card-text">Happy <br/> Birthday <br/> Vivi! 🎂</p>
+              </div>
+              <div class="envelope__side envelope__side--right"></div>
+              <div class="envelope__side envelope__side--left"></div>
+              <div class="envelope__side envelope__side--bottom"></div>
+              <svg class="heart"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-heart"></use></svg>
+          </div>
+      </a>
+  </div>
+
+
+  <script src="jquery.js"></script>
+  <script src="envelope.js"></script>
+    <script src="../../shared/jeda-saat-tersembunyi.js"></script>
+</body>
+</html>

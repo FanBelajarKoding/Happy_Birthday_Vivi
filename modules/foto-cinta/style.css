@@ -1,0 +1,79 @@
+/* ===== [HATI-BASE] ===== */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #2a1420 0%, #1b1b1b 70%);
+  font-family: "Poppins", sans-serif;
+  color: #fffdfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.hati-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.hati-judul {
+  font-family: "Amatic SC", cursive;
+  font-size: clamp(32px, 7vw, 48px);
+  color: rgba(255, 105, 180, 0.9);
+  margin: 18px 0 0;
+}
+
+.hati-subjudul {
+  font-size: 13px;
+  color: #f7c6d9;
+  margin: 0;
+}
+/* ===== END [HATI-BASE] ===== */
+
+/* ===== [HATI-PANGGUNG] ===== */
+.hati-panggung {
+  position: relative;
+  width: min(380px, 88vw);
+  /* tinggi & ukuran tiap ubin dihitung & ditulis JS lewat style.setProperty,
+     biar proporsional di layar berapa pun (lihat script.js) */
+}
+
+.hati-ubin {
+  position: absolute;
+  background: #fff;
+  padding: 3px;
+  border-radius: 3px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.3, 1), opacity 0.8s ease;
+}
+
+.hati-ubin.tampak {
+  opacity: 1;
+}
+
+.hati-ubin img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 2px;
+}
+
+.hati-ubin__placeholder {
+  width: 100%;
+  height: 100%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 16px;
+}
+/* ===== END [HATI-PANGGUNG] ===== */

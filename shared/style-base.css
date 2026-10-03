@@ -1,0 +1,542 @@
+/* =====================================================================
+   SHARED STYLE BASE
+   Dipakai HANYA oleh bagian baru: index.html (gerbang, container scroll,
+   nav titik) dan modul memory-timeline. Modul 1-5 lama TIDAK pakai file
+   ini — CSS mereka sengaja dibiarkan berdiri sendiri (lihat mega prompt
+   Bagian 5.3: pisahkan CSS/JS per modul biar gampang di-debug).
+   ===================================================================== */
+
+/* SHARED */
+:root {
+  /* -- palet, diturunkan dari modul lama (Bagian 4 mega prompt),
+        bukan warna baru pilihan AI -- */
+  --c-pink: rgba(255, 105, 180, 0.85);
+  --c-pink-soft: #f7c6d9;
+  --c-red-accent: #e08282;
+  --c-cream: #f5f6d6;
+  --c-dark: #1b1b1b;
+  --c-white: #fffdfa;
+
+  /* -- font, senada dengan yang sudah dipakai tiap modul -- */
+  --f-handwriting: "Amatic SC", cursive;
+  --f-body: "Poppins", sans-serif;
+
+  --babak-transisi: 0.6s ease;
+  --f-mono: ui-monospace, "SF Mono", "Fira Code", "Courier New", monospace;
+}
+
+/* SHARED */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--f-body);
+  background: var(--c-dark);
+  overflow: hidden; /* kunci pembuka: scroll baru aktif setelah gerbang diklik, lihat main.js */
+}
+
+/* ===== KONTAINER SCROLL-SNAP ===== */
+.kapsul-container {
+  height: 100vh;
+  width: 100vw;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+.kapsul-container.kapsul-terbuka {
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+}
+
+.babak {
+  height: 100vh;
+  width: 100vw;
+  scroll-snap-align: start;
+  position: relative;
+}
+
+/* babak yang isinya modul lama, dibungkus iframe supaya CSS/JS
+   tiap modul tidak saling tabrakan (lihat catatan di chat) */
+.babak--frame {
+  overflow: hidden;
+}
+
+.babak--frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* ===== END KONTAINER SCROLL-SNAP ===== */
+
+/* ===== GERBANG PEMBUKA ===== */
+.babak--gerbang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background: radial-gradient(circle at center, #2a1420 0%, var(--c-dark) 70%);
+  color: var(--c-white);
+  text-align: center;
+  padding: 24px;
+}
+
+.gerbang__judul {
+  font-family: var(--f-handwriting);
+  font-size: clamp(48px, 10vw, 96px);
+  color: var(--c-pink);
+  margin: 0;
+  line-height: 1;
+}
+
+.gerbang__subjudul {
+  font-size: clamp(14px, 2.5vw, 18px);
+  color: var(--c-pink-soft);
+  margin: 0;
+  max-width: 480px;
+}
+
+.gerbang__tombol {
+  font-family: var(--f-body);
+  font-size: 16px;
+  padding: 14px 36px;
+  border-radius: 999px;
+  border: 1px solid var(--c-pink);
+  background: transparent;
+  color: var(--c-white);
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.gerbang__tombol:hover {
+  background: var(--c-pink);
+  color: var(--c-dark);
+}
+
+.gerbang__petunjuk-scroll {
+  position: absolute;
+  bottom: 32px;
+  font-size: 13px;
+  color: var(--c-pink-soft);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  animation: turun-naik 1.6s ease-in-out infinite;
+}
+
+.gerbang__petunjuk-scroll.tampil {
+  opacity: 0.85;
+}
+
+@keyframes turun-naik {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+/* ===== END GERBANG PEMBUKA ===== */
+
+/* ===== GERBANG: PANGGUNG & FASE ===== */
+/* 3 fase (kado / kue / gelap) ditumpuk pakai position:absolute di
+   dalam satu kotak, gantian kelihatan lewat class "tampak" — jadi
+   pindah fase itu cuma soal fade opacity, bukan pindah halaman. */
+.gerbang__panggung {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fase {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.fase.tampak {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gerbang__petunjuk {
+  font-size: 13px;
+  color: var(--c-pink-soft);
+  margin: 0;
+}
+/* ===== END GERBANG: PANGGUNG & FASE ===== */
+
+/* ===== GERBANG: FASE KADO ===== */
+.kado {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 150px;
+  height: 150px;
+  filter: drop-shadow(0 0 26px rgba(255, 105, 180, 0.35));
+  animation: goyang-kado 1.8s ease-in-out infinite;
+}
+
+@keyframes goyang-kado {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-4deg); }
+  40% { transform: rotate(3deg); }
+  60% { transform: rotate(-2deg); }
+  80% { transform: rotate(2deg); }
+}
+
+.kado.meledak {
+  animation: none;
+}
+
+.kado__badan,
+.kado__tutup {
+  transform-origin: 50px 60px;
+  transition: transform 0.7s cubic-bezier(0.3, 0.6, 0.3, 1), opacity 0.7s ease;
+}
+
+.kado.meledak .kado__tutup {
+  transform: translate(30px, -160px) rotate(55deg);
+  opacity: 0;
+}
+
+.kado.meledak .kado__badan {
+  transform: scale(0.85);
+  opacity: 0;
+}
+
+.kado__isi-badan { fill: var(--c-pink); }
+.kado__isi-tutup { fill: #c23f74; }
+.kado__isi-pita { fill: #fdf3f6; }
+
+.fountain-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.partikel-fountain {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  font-size: 20px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: lompat-jatuh var(--durasi, 1.1s) ease-out forwards;
+  animation-delay: var(--tunda, 0s);
+}
+
+@keyframes lompat-jatuh {
+  0% { transform: translate(-50%, -50%) translate(0, 0) scale(0.5); opacity: 0; }
+  10% { opacity: 1; }
+  45% { transform: translate(-50%, -50%) translate(var(--dx), var(--puncak)) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(calc(var(--dx) * 1.35), 230px) scale(0.6); opacity: 0; }
+}
+/* ===== END GERBANG: FASE KADO ===== */
+
+/* ===== GERBANG: FASE KUE ===== */
+.bunting {
+  width: 220px;
+  height: 34px;
+  margin-bottom: -6px;
+}
+.bunting__tali { fill: none; stroke: rgba(255, 255, 255, 0.25); stroke-width: 1; }
+.bunting__bendera { fill: var(--c-pink); }
+.bunting__bendera--alt { fill: var(--c-pink-soft); }
+
+.kue__svg { width: 180px; height: auto; }
+.kue__isi-lilin { fill: #fdf3f6; }
+.kue__isi-atas { fill: #f6a8c6; }
+.kue__isi-tutup { fill: #fceef4; }
+.kue__isi-bawah { fill: var(--c-pink); }
+.kue__isi-alas { fill: #c23f74; }
+
+.area-tiup {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 60px;
+  height: 60px;
+  margin-top: -78px; /* narik area tiup ke posisi api, di atas svg kue */
+}
+
+.cincin-tiup {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--c-pink);
+  opacity: 0.55;
+  animation: denyut-cincin 1.6s ease-in-out infinite;
+}
+
+@keyframes denyut-cincin {
+  0%, 100% { transform: scale(0.9); opacity: 0.4; }
+  50% { transform: scale(1.08); opacity: 0.8; }
+}
+
+.api-lilin {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.kue__isi-api-luar { fill: #f4a53c; }
+.kue__isi-api-dalam { fill: #fddc9a; }
+
+.api-lilin path {
+  transform-origin: 50px 17px;
+  animation: kelap-kelip 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes kelap-kelip {
+  from { transform: scaleY(1) scaleX(1); }
+  to { transform: scaleY(1.12) scaleX(0.92); }
+}
+
+.area-tiup.menahan .api-lilin path {
+  animation: goyang-ketiup 0.22s ease-in-out infinite;
+}
+
+@keyframes goyang-ketiup {
+  0%, 100% { transform: rotate(0deg) scaleY(1); }
+  50% { transform: rotate(16deg) scaleY(0.65); }
+}
+
+.area-tiup.padam .api-lilin {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.area-tiup.padam .cincin-tiup {
+  animation: none;
+  opacity: 0;
+}
+
+.asap-lilin {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  opacity: 0;
+}
+
+.asap-lilin.tampak {
+  animation: ngepul 1.3s ease-out forwards;
+}
+
+@keyframes ngepul {
+  0% { opacity: 0.6; transform: translateX(-50%) translateY(0) scale(0.7); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-26px) scale(1.5); }
+}
+/* ===== END GERBANG: FASE KUE ===== */
+
+/* ===== GERBANG: OVERLAY GELAP (transisi kue -> kata-kata) ===== */
+.gelap-overlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+.gelap-overlay.aktif {
+  opacity: 1;
+}
+/* ===== END GERBANG: OVERLAY GELAP ===== */
+
+/* ===== TITIK NAVIGASI ANTAR BABAK ===== */
+.nav-titik {
+  position: fixed;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 50;
+}
+
+.nav-titik__item {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: 0.25s ease;
+}
+
+.nav-titik__item.aktif {
+  background: var(--c-pink);
+  transform: scale(1.35);
+}
+/* ===== END TITIK NAVIGASI ===== */
+
+/* ===== JEJAK KURSOR (utas penghubung) ===== */
+/* Catatan: efek ini cuma muncul di dokumen utama (gerbang & timeline),
+   nggak bisa nembus ke dalam <iframe> babak 1-5 karena browser memang
+   mengisolasi mousemove tiap iframe demi keamanan. Jadi efeknya paling
+   kerasa di titik pembuka & penutup — itu yang bikin terasa "satu
+   bingkai", bukan berarti nyala terus sepanjang scroll. */
+.jejak-hati {
+  position: fixed;
+  pointer-events: none;
+  font-size: 14px;
+  color: var(--c-pink);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+  transition: opacity 0.5s ease, transform 0.9s ease;
+  z-index: 40;
+}
+
+.jejak-hati.tampil {
+  opacity: 0.8;
+  transform: translate(-50%, -80%) scale(1.1);
+}
+/* ===== END JEJAK KURSOR ===== */
+
+/* ===== TOMBOL LANJUT ===== */
+/* Kenapa perlu tombol ini, bukan cuma scroll-wheel biasa: begitu babak
+   1-6 dibungkus <iframe>, scroll-wheel di atas iframe itu ditangkap
+   dokumen di dalam iframe sendiri, bukan diteruskan ke halaman utama.
+   Jadi tombol ini (dan titik navigasi di kanan) jadi cara pindah babak
+   yang selalu bisa diandalkan, apapun yang ada di dalam iframe-nya. */
+.tombol-lanjut {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--c-pink);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--c-white);
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 50;
+  transition: 0.3s ease;
+}
+
+.tombol-lanjut:hover {
+  background: var(--c-pink);
+  color: var(--c-dark);
+}
+
+.tombol-lanjut.tersembunyi {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hint-navigasi {
+  position: fixed;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--c-pink-soft);
+  font-size: 12px;
+  max-width: 110px;
+  text-align: right;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 49;
+}
+
+.hint-navigasi.tampil {
+  opacity: 0.9;
+}
+/* ===== END TOMBOL LANJUT ===== */
+
+/* ===== LAYAR LOADING ===== */
+.layar-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--c-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  transition: opacity 0.6s ease;
+}
+
+.layar-loading.selesai {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* grafik gelombang hati (kanvas digambar shared/loading.js) */
+.loading__grafik {
+  width: 300px;
+  max-width: 88vw;
+  height: auto;
+  aspect-ratio: 300 / 270;
+}
+
+.loading__teks {
+  font-family: var(--f-body);
+  font-size: 13px;
+  color: var(--c-pink-soft);
+  margin: 0;
+}
+
+.loading__persen {
+  font: 12px var(--f-mono);
+  letter-spacing: 0.06em;
+  color: rgba(247, 198, 217, 0.7);
+  margin: 0;
+}
+/* ===== END LAYAR LOADING ===== */
+
+/* ===== LAYER TRANSISI (ASCII antar babak) ===== */
+/* Isinya kanvas yang digambar shared/transisi.js. Latar gelap + fade di
+   bawah ini cuma dipakai versi reduced-motion (tanpa sapuan ASCII). */
+.transisi-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  overflow: hidden;
+  background: #000; /* sama dengan latar modul ASCII; hanya terlihat di versi reduced-motion */
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.transisi-layer.aktif {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layar-loading {
+    transition-duration: 0.2s;
+  }
+}
+/* ===== END LAYER TRANSISI ===== */
+
+/* ===== BABAK JEDA ===== */
+/* Babak yang tidak sedang dilihat dijeda animasinya (class dipasang main.js) */
+.babak.jeda *,
+.babak.jeda *::before,
+.babak.jeda *::after { animation-play-state: paused !important; }
+/* ===== END BABAK JEDA ===== */

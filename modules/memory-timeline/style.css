@@ -1,0 +1,97 @@
+/* ===== [TIMELINE-BASE] ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fdf6f2;
+  font-family: "Poppins", sans-serif;
+  color: #3a2b2f;
+}
+
+.tl-header,
+.tl-penutup {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.tl-header h1,
+.tl-penutup h2 {
+  font-family: "Amatic SC", cursive;
+  font-size: clamp(48px, 9vw, 84px);
+  color: #e08282;
+  margin: 0 0 8px;
+}
+
+.tl-penutup {
+  background: linear-gradient(180deg, #fdf6f2 0%, #ffe3ea 100%);
+}
+/* ===== END [TIMELINE-BASE] ===== */
+
+/* ===== [TIMELINE-LIST] ===== */
+.tl-list {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 10vh 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12vh;
+}
+
+.tl-kartu {
+  opacity: 0;
+  transform: translateY(40px) rotate(var(--miring, 0deg));
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  background: #fff;
+  padding: 14px 14px 22px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+
+.tl-kartu.tl-kartu--kiri {
+  align-self: flex-start;
+}
+
+.tl-kartu.tl-kartu--kanan {
+  align-self: flex-end;
+}
+
+.tl-kartu.tampak {
+  opacity: 1;
+  transform: translateY(0) rotate(var(--miring, 0deg));
+}
+
+.tl-kartu img {
+  width: 260px;
+  max-width: 60vw;
+  display: block;
+}
+
+.tl-kartu__placeholder {
+  width: 260px;
+  max-width: 60vw;
+  aspect-ratio: 4 / 5;
+  border: 2px dashed #e0b8b8;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #c79a9a;
+  font-size: 13px;
+  padding: 12px;
+}
+
+.tl-kartu__keterangan {
+  font-family: "Amatic SC", cursive;
+  font-size: 22px;
+  margin: 10px 4px 0;
+  color: #5a4247;
+}
+/* ===== END [TIMELINE-LIST] ===== */

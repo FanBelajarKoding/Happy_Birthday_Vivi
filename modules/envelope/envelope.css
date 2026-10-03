@@ -1,0 +1,170 @@
+body {
+  background-color: #E08282;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+}
+
+.envelope-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  transform: translate(-50%, -20%);
+}
+
+.envelope {
+  position: relative;
+  display: block;
+  width: 300px;
+  height: 200px;
+  margin: auto;
+  background-color: #C9D0D2;
+}
+
+.envelope .envelope__card {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  width: 250px;
+  height: 200px;
+  margin: 0 25px;
+  background-color: #f5f6d6;
+}
+.envelope .envelope__card.open {
+  -webkit-animation: cardJump .5s ease .5s forwards;
+  -o-animation: cardJump .5s ease .5s forwards;
+  animation: cardJump .5s ease .5s forwards;
+  z-index: 1;
+}
+
+.envelope .enveloper__card-text {
+  padding: 10px 20px;
+  font-size: 42px;
+  margin: 0;
+  color: black;
+  font-family: 'Amatic SC', cursive;
+}
+
+.envelope .envelope__side {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  z-index: 2;
+}
+
+.envelope .envelope__side--left {
+  left: 0;
+  border-width: 100px 0 100px 150px;
+  border-color: transparent transparent transparent #ffffff;
+}
+
+.envelope .envelope__side--right {
+  right: 0;
+  border-width: 100px 150px 100px 0;
+  border-color: transparent #ffffff transparent transparent;
+}
+
+.envelope .envelope__side--bottom {
+  top: auto;
+  left: 0;
+  bottom: 0;
+  border-width: 0 150px 100px 150px;
+  border-color: transparent transparent #ecf0f1 transparent;
+}
+
+.envelope .envelope__side--top {
+  top: 0;
+  left: 0;
+  bottom: auto;
+  border-width: 100px 150px 0 150px;
+  border-color: #ecf0f1 transparent transparent transparent;
+  z-index: 1;
+}
+
+.envelope.open > .envelope__side--top {
+  top: -100px;
+  border-width: 0 150px 100px 150px;
+  border-color: transparent transparent #C9D0D2 transparent;
+}
+
+.heart {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  margin-top: -25%;
+  margin-left: -25px;
+  width: 50px;
+  fill: red;
+  z-index: 2;
+  transition: 0.2s;
+}
+
+.envelope:hover .heart {
+  transform: scale(1.2);
+  trasition: .5s ease;
+}
+
+.envelope.open:hover .heart {
+  transform: none;
+}
+
+.tossing{
+  animation-name: tossing;
+  -webkit-animation-name: tossing;
+
+  animation-duration: .5s;
+  -webkit-animation-duration: .5s;
+
+  animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+
+  -webkit-animation-timing-function: ease;
+  animation-timing-function: ease;
+}
+
+@keyframes tossing {
+  0% {
+      transform: rotate(-4deg);
+  }
+  50% {
+      transform: rotate(4deg);
+  }
+  100% {
+      transform: rotate(-4deg);
+  }
+}
+
+@-webkit-keyframes tossing {
+  0% {
+      -webkit-transform: rotate(-4deg);
+  }
+  50% {
+      -webkit-transform: rotate(4deg);
+  }
+  100% {
+      -webkit-transform: rotate(-4deg);
+  }
+}
+
+@keyframes cardJump {
+  from {
+      transform: translateY(0);
+  }
+  to {
+      transform: translateY(-200px);
+  }
+}
+
+@-webkit-keyframes cardJump {
+  from {
+      -webkit-transform: translateY(0);
+  }
+  to {
+      -webkit-transform: translateY(-200px);
+  }
+}

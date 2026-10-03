@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kado Ulang Tahun — Vivi</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@300;400;600&display=swap"
+    />
+    <link rel="stylesheet" href="shared/style-base.css" />
+  </head>
+  <body>
+    <!-- ===== [LAYAR-LOADING] ===== -->
+    <div class="layar-loading" id="layarLoading" aria-hidden="true">
+      <!-- Grafik gelombang yang berubah jadi hati, digambar shared/loading.js -->
+      <canvas class="loading__grafik" id="loadingGrafik" aria-hidden="true"></canvas>
+      <!-- EDIT: ganti kalimat loading ini kalau mau -->
+      <p class="loading__teks">Bentar, kadonya lagi dibungkus...</p>
+      <p class="loading__persen" id="loadingPersen">0%</p>
+    </div>
+    <!-- ===== END [LAYAR-LOADING] ===== -->
+
+    <!-- ===== [LAYER-TRANSISI] ===== -->
+    <!-- Kanvas ASCII digambar shared/transisi.js tiap pindah babak, dihapus lagi setelahnya -->
+    <div class="transisi-layer" id="transisiLayer" aria-hidden="true"></div>
+    <!-- ===== END [LAYER-TRANSISI] ===== -->
+
+    <div class="kapsul-container" id="kapsulContainer">
+      <!-- ===== [BABAK-0-GERBANG] ===== -->
+      <section class="babak babak--gerbang" id="babak-0">
+        <div class="gerbang__panggung" id="gerbangPanggung">
+          <!-- FASE 1: kado -->
+          <div class="fase fase--kado tampak" id="faseKado">
+            <button class="kado" id="tombolKado" aria-label="Ketuk buat buka kado">
+              <svg viewBox="0 0 100 100" width="100%" height="100%">
+                <g class="kado__badan">
+                  <rect x="20" y="45" width="60" height="42" rx="3" class="kado__isi-badan" />
+                  <rect x="46" y="45" width="8" height="42" class="kado__isi-pita" />
+                </g>
+                <g class="kado__tutup">
+                  <rect x="15" y="36" width="70" height="14" rx="3" class="kado__isi-tutup" />
+                  <rect x="15" y="41" width="70" height="6" class="kado__isi-pita" />
+                  <ellipse cx="42" cy="34" rx="10" ry="7" class="kado__isi-tutup" transform="rotate(-20 42 34)" />
+                  <ellipse cx="58" cy="34" rx="10" ry="7" class="kado__isi-tutup" transform="rotate(20 58 34)" />
+                  <circle cx="50" cy="35" r="4.5" class="kado__isi-pita" />
+                </g>
+              </svg>
+            </button>
+            <!-- EDIT: ganti kalimat ini kalau mau -->
+            <p class="gerbang__petunjuk">Ketuk kadonya</p>
+          </div>
+
+          <!-- partikel bunga fountain, dibuat JS pas kado diketuk -->
+          <div class="fountain-layer" id="fountainLayer" aria-hidden="true"></div>
+
+          <!-- FASE 2: kue & lilin -->
+          <div class="fase fase--kue" id="faseKue">
+            <svg class="bunting" viewBox="0 0 200 30" aria-hidden="true">
+              <polyline points="0,4 200,4" class="bunting__tali" />
+              <polygon points="14,4 30,4 22,22" class="bunting__bendera" />
+              <polygon points="50,4 66,4 58,22" class="bunting__bendera bunting__bendera--alt" />
+              <polygon points="86,4 102,4 94,22" class="bunting__bendera" />
+              <polygon points="122,4 138,4 130,22" class="bunting__bendera bunting__bendera--alt" />
+              <polygon points="158,4 174,4 166,22" class="bunting__bendera" />
+            </svg>
+
+            <svg class="kue__svg" viewBox="0 0 100 100">
+              <rect x="47" y="30" width="6" height="18" rx="2" class="kue__isi-lilin" />
+              <path d="M25,48 L25,42 L32,35 L39,42 L46,35 L54,42 L61,35 L68,42 L75,42 L75,48 Z" class="kue__isi-atas" />
+              <rect x="22" y="48" width="56" height="20" rx="2" class="kue__isi-tutup" />
+              <rect x="16" y="68" width="68" height="20" rx="2" class="kue__isi-bawah" />
+              <rect x="12" y="88" width="76" height="5" rx="2.5" class="kue__isi-alas" />
+            </svg>
+
+            <button class="area-tiup" id="areaTiup" aria-label="Tekan &amp; tahan buat tiup lilin">
+              <span class="cincin-tiup" aria-hidden="true"></span>
+              <svg class="api-lilin" id="apiLilin" viewBox="0 0 100 100" aria-hidden="true">
+                <path d="M50,10 C53,14 56,17 50,24 C44,17 47,14 50,10 Z" class="kue__isi-api-luar" />
+                <path d="M50,14 C51.5,16 53,17.5 50,21 C47,17.5 48.5,16 50,14 Z" class="kue__isi-api-dalam" />
+              </svg>
+              <span class="asap-lilin" id="asapLilin" aria-hidden="true">〜</span>
+            </button>
+            <!-- EDIT: ganti kalimat ini kalau mau -->
+            <p class="gerbang__petunjuk">Tekan &amp; tahan lilinnya sampai padam</p>
+          </div>
+
+          <!-- lapisan hitam buat transisi kue -> kata-kata -->
+          <div class="gelap-overlay" id="overlayGelap" aria-hidden="true"></div>
+
+          <!-- FASE 3: kata-kata -->
+          <div class="fase fase--gelap" id="faseGelap">
+            <h1 class="gerbang__judul">Untuk Vivi</h1>
+            <!-- EDIT: ganti kalimat pembuka ini kalau mau -->
+            <p class="gerbang__subjudul">
+              Ada beberapa kenangan kecil yang mau aku tunjukkan. Siap?
+            </p>
+            <button class="gerbang__tombol" id="tombolGerbangLanjut">Lanjut</button>
+          </div>
+        </div>
+      </section>
+      <!-- ===== END [BABAK-0-GERBANG] ===== -->
+
+      <!-- ===== [BABAK-1-DRAG-PAPER] ===== -->
+      <section class="babak babak--frame" id="babak-1">
+        <iframe src="modules/drag-paper/index.html" title="Kertas yang bisa digeser" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-1-DRAG-PAPER] ===== -->
+
+      <!-- ===== [BABAK-2-FLOWER-BLOOM] ===== -->
+      <section class="babak babak--frame" id="babak-2">
+        <iframe src="modules/flower-bloom/index.html" title="Klik untuk bunga bermekaran" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-2-FLOWER-BLOOM] ===== -->
+
+      <!-- ===== [BABAK-3-FLIP-GALLERY] ===== -->
+      <section class="babak babak--frame" id="babak-3">
+        <iframe src="modules/flip-gallery/index.html" title="Galeri foto berputar" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-3-FLIP-GALLERY] ===== -->
+
+      <!-- ===== [BABAK-4-LOVE-TRUCK] ===== -->
+      <section class="babak babak--frame" id="babak-4">
+        <iframe src="modules/love-truck/loveTruck.html" title="Truk & surat" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-4-LOVE-TRUCK] ===== -->
+
+      <!-- ===== [BABAK-5-ENVELOPE] ===== -->
+      <section class="babak babak--frame" id="babak-5">
+        <iframe src="modules/envelope/envelope.html" title="Amplop ulang tahun" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-5-ENVELOPE] ===== -->
+
+      <!-- ===== [BABAK-6-FOTO-CINTA] ===== -->
+      <section class="babak babak--frame" id="babak-6">
+        <iframe src="modules/foto-cinta/index.html" title="Foto membentuk pola hati" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-6-FOTO-CINTA] ===== -->
+
+      <!-- ===== [BABAK-7-MEMORY-TIMELINE] ===== -->
+      <section class="babak babak--frame" id="babak-7">
+        <iframe src="modules/memory-timeline/index.html" title="Timeline kenangan" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-7-MEMORY-TIMELINE] ===== -->
+
+      <!-- ===== [BABAK-8-ASCII-KADO] ===== -->
+      <section class="babak babak--frame" id="babak-8">
+        <iframe src="modules/ascii-kado/index.html" title="Lirik, foto, dan video ASCII" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-8-ASCII-KADO] ===== -->
+
+      <!-- ===== [BABAK-9-CATATAN-KECIL] ===== -->
+      <section class="babak babak--frame" id="babak-9">
+        <iframe src="modules/catatan-kecil/index.html" title="Catatan kecil" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-9-CATATAN-KECIL] ===== -->
+
+      <!-- ===== [BABAK-10-PENUTUP-AKHIR] ===== -->
+      <section class="babak babak--frame" id="babak-10">
+        <iframe src="modules/penutup-akhir/index.html" title="Kartu penutup" loading="lazy"></iframe>
+      </section>
+      <!-- ===== END [BABAK-10-PENUTUP-AKHIR] ===== -->
+    </div>
+
+    <!-- ===== [NAVIGASI] ===== -->
+    <nav class="nav-titik" id="navTitik" aria-label="Navigasi babak"></nav>
+    <p class="hint-navigasi" id="hintNavigasi">
+      titik ini buat lompat ke babak mana pun
+    </p>
+    <button class="tombol-lanjut tersembunyi" id="tombolLanjut" aria-label="Babak selanjutnya">
+      ↓
+    </button>
+    <!-- ===== END [NAVIGASI] ===== -->
+
+    <script src="shared/utils.js"></script>
+    <script src="shared/ascii-hati.js"></script>
+    <script src="shared/cursor-trail.js"></script>
+    <script src="shared/loading.js"></script>
+    <script src="shared/transisi.js"></script>
+    <script src="shared/gerbang-kado.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
